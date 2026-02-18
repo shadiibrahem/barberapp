@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حجز موعد</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background:#0b0d10;
+            color:#fff;
+        }
+
+        .wrap { max-width: 760px; }
+
+        .card-pro {
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,.4);
+        }
+
+        .title {
+            text-align:center;
+            font-weight:900;
+            font-size:1.8rem;
+            margin-bottom: 6px;
+            color:#ffc107;
+        }
+
+        .subtitle {
+            text-align:center;
+            color:rgba(255,255,255,.6);
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            font-weight:800;
+            color:#ffc107;
+        }
+
+        .form-control, .form-select {
+            background:#111418;
+            border:1px solid rgba(255,255,255,.1);
+            color:#fff;
+            border-radius:14px;
+            padding:12px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color:#ffc107;
+            box-shadow: 0 0 0 2px rgba(255,193,7,.25);
+            background:#111418;
+            color:#fff;
+        }
+
+        .btn-gold {
+            background:#ffc107;
+            border:0;
+            color:#111;
+            font-weight:900;
+            padding:12px;
+            border-radius:14px;
+        }
+
+        .btn-gold:hover { filter:brightness(.95); }
+
+        .btn-outline-light { border-radius:14px; }
+
+        .note {
+            font-size:.9rem;
+            color:rgba(255,255,255,.6);
+        }
+
+        .alert-custom {
+            background: rgba(220,53,69,.15);
+            border:1px solid rgba(220,53,69,.4);
+            color:#ffb3b3;
+            border-radius:14px;
+        }
+
+        .alert-info-custom{
+            background: rgba(255,193,7,.10);
+            border: 1px solid rgba(255,193,7,.25);
+            color: rgba(255,255,255,.9);
+            border-radius:14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container py-5 wrap">
+
+    <div class="title">
+        <i class="fa-solid fa-scissors ms-2"></i>
+        احجز موعدك الآن
+    </div>
+    <div class="subtitle">
+        اختر الخدمة والتاريخ ثم أكد الحجز بسهولة
+    </div>
+
+    <!-- error (booked or dayoff) -->
+    <div th:if="${param.error}" class="alert alert-custom text-center mb-4">
+        هذا الوقت غير متاح، اختر وقتًا آخر.
+    </div>
+
+    <!-- Day off message -->
+    <div th:if="${isDayOff}" class="alert alert-info-custom text-center mb-4">
+        <i class="fa-solid fa-ban ms-2"></i>
+        <span th:text="${dayOffMessage}">هذا اليوم عطلة / مغلق. اختر يومًا آخر.</span>
+    </div>
+
+    <!-- STEP 1 (AUTO refresh - no button) -->
+    <div class="card card-pro p-4 mb-4">
+        <h5 class="mb-3 fw-bold text-warning">
+            <i class="fa-solid fa-calendar-days ms-2"></i>
+            اختيار الخدمة والتاريخ
+        </h5>
+
+        <form method="get" action="/book" id="autoForm">
+            <div class="mb-3">
+                <label class="form-label">التاريخ</label>
+                <input class="form-control"
+                       type="date"
+                       name="date"
+                       id="dateInput"
+                       th:value="${selectedDate}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">الخدمة</label>
+                <select class="form-select" name="serviceId" id="serviceSelect">
+                    <option th:each="s : ${services}"
+                            th:value="${s.id}"
+                            th:selected="${s.id == selectedServiceId}"
+                            th:text="${s.name + ' - ' + s.price + ' ₪'}">
+                    </option>
+                </select>
+            </div>
+        </form>
+
+        <div class="note">
+            يتم تحديث الأوقات تلقائيًا عند تغيير التاريخ أو الخدمة.
+        </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="card card-pro p-4">
+        <h5 class="mb-3 fw-bold text-warning">
+            <i class="fa-solid fa-user-check ms-2"></i>
+            أدخل بياناتك
+        </h5>
+
+        <form method="post" action="/book">
+
+            <input type="hidden" name="date" id="hiddenDate" th:value="${selectedDate}">
+            <input type="hidden" name="serviceId" id="hiddenServiceId" th:value="${selectedServiceId}">
+
+            <div class="mb-3">
+                <label class="form-label">الاسم</label>
+                <input class="form-control" name="customerName" required th:disabled="${isDayOff}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">رقم الهاتف</label>
+                <input class="form-control" name="phone" required th:disabled="${isDayOff}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">الوقت المتاح</label>
+                <select class="form-select" name="time" required th:disabled="${isDayOff}">
+                    <option value="" disabled selected>اختر وقتًا</option>
+                    <option th:each="t : ${slots}" th:value="${t}" th:text="${t}"></option>
+                </select>
+                <div class="note mt-2">
+                    إذا لم تظهر أوقات، غيّر الخدمة أو التاريخ وسيتم تحديثها تلقائيًا.
+                </div>
+            </div>
+
+            <button class="btn btn-gold w-100" th:disabled="${isDayOff}">
+                تأكيد الحجز
+            </button>
+
+        </form>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="/" class="btn btn-outline-light">
+            ⬅ الرجوع للرئيسية
+        </a>
+    </div>
+
+</div>
+
+<script>
+    const dateInput = document.getElementById('dateInput');
+    const serviceSelect = document.getElementById('serviceSelect');
+    const hiddenDate = document.getElementById('hiddenDate');
+    const hiddenServiceId = document.getElementById('hiddenServiceId');
+    const autoForm = document.getElementById('autoForm');
+
+    function syncHidden() {
+        if (hiddenDate) hiddenDate.value = dateInput.value;
+        if (hiddenServiceId) hiddenServiceId.value = serviceSelect.value;
+    }
+
+    function autoSubmit() {
+        syncHidden();
+        autoForm.submit();
+    }
+
+    dateInput.addEventListener('change', autoSubmit);
+    serviceSelect.addEventListener('change', autoSubmit);
+
+    syncHidden();
+</script>
+
+</body>
+</html>
