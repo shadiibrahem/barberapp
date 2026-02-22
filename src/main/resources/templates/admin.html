@@ -10,107 +10,117 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-            background:#0b0d10;
-            color:#fff;
+        body{
+            font-family:'Cairo',sans-serif;
+            background:#f6f7f9;
+            color:#222;
         }
 
-        .wrap { max-width: 1100px; }
+        .wrap{ max-width: 1100px; }
 
-        .card-pro {
-            background: rgba(255,255,255,.04);
-            border: 1px solid rgba(255,255,255,.08);
-            border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(0,0,0,.4);
+        .topbar{
+            background:#fff;
+            padding: 28px 0 18px;
+            border-bottom:1px solid #e5e7eb;
         }
-
-        .title {
+        .brand{
+            display:flex; align-items:center; justify-content:center; gap:10px;
+            font-weight:900; color:#111;
+        }
+        .brand i{ color:#3b82f6; }
+        .subtitle{
             text-align:center;
-            font-weight:900;
-            font-size:2rem;
-            margin-bottom: 6px;
-            color:#ffc107;
+            color:#6b7280;
+            margin-top:6px;
+            font-size:.95rem;
         }
 
-        .subtitle {
-            text-align:center;
-            color:rgba(255,255,255,.6);
-            margin-bottom: 25px;
+        .card-pro{
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:20px;
+            box-shadow:0 6px 25px rgba(0,0,0,.05);
         }
 
-        .form-label {
+        .section-h{
+            display:flex; align-items:center; justify-content:space-between;
+            gap:10px;
+            margin-bottom:14px;
+        }
+        .section-title{
+            display:flex; align-items:center; gap:10px;
+            font-weight:900; color:#111;
+            margin:0;
+        }
+        .section-title i{ color:#3b82f6; }
+
+        .note{ font-size:.9rem; color:#6b7280; }
+
+        .form-label{
             font-weight:800;
-            color:#ffc107;
-        }
-
-        .form-control {
-            background:#111418;
-            border:1px solid rgba(255,255,255,.1);
-            color:#fff;
-            border-radius:14px;
-            padding:12px;
-        }
-
-        .form-control:focus {
-            border-color:#ffc107;
-            box-shadow: 0 0 0 2px rgba(255,193,7,.25);
-            background:#111418;
-            color:#fff;
-        }
-
-        .btn-gold {
-            background:#ffc107;
-            border:0;
             color:#111;
-            font-weight:900;
+        }
+
+        .form-control{
+            border-radius:14px;
             padding:12px;
+            border:1px solid #e5e7eb;
+            background:#fff;
+        }
+        .form-control:focus{
+            border-color:#3b82f6;
+            box-shadow:0 0 0 3px rgba(59,130,246,.15);
+        }
+
+        .btn-primary-clean{
+            background:#3b82f6;
+            border:0;
+            color:#fff;
+            font-weight:900;
+            padding:12px 14px;
             border-radius:14px;
+            transition:.2s;
         }
-        .btn-gold:hover { filter:brightness(.95); }
+        .btn-primary-clean:hover{ background:#2563eb; }
 
-        .btn-outline-light {
+        .btn-outline-clean{
             border-radius:14px;
-            font-weight:800;
+            font-weight:900;
+            border:1px solid #cbd5e1;
+            background:#fff;
+            color:#111;
+            padding:10px 14px;
         }
+        .btn-outline-clean:hover{ background:#f1f5f9; }
 
-        .note {
-            font-size:.9rem;
-            color:rgba(255,255,255,.6);
-        }
-
-        .divider {
+        .divider{
             height:1px;
-            background:rgba(255,255,255,.08);
+            background:#e5e7eb;
             margin: 18px 0;
         }
 
-        /* ===== STATS (VISIBLE) ===== */
+        /* ===== STATS ===== */
         .stats-grid{
             display:grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
+            gap: 14px;
         }
         @media (max-width: 768px){
             .stats-grid{ grid-template-columns: 1fr; }
         }
-
         .stat-card{
-            background: rgba(255,255,255,.03);
-            border: 1px solid rgba(255,255,255,.08);
-            border-radius: 18px;
-            padding: 18px;
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:18px;
+            padding: 16px;
+            box-shadow:0 6px 25px rgba(0,0,0,.05);
             display:flex;
             align-items:center;
             justify-content:space-between;
         }
-
         .stat-left{
-            display:flex;
-            align-items:center;
-            gap:12px;
+            display:flex; align-items:center; gap:12px;
         }
-
         .stat-icon{
             width:44px;
             height:44px;
@@ -118,86 +128,74 @@
             display:flex;
             align-items:center;
             justify-content:center;
-            background: rgba(255,193,7,.10);
-            border: 1px solid rgba(255,193,7,.18);
+            background:#eff6ff;
+            border:1px solid #bfdbfe;
         }
-
-        .stat-icon i{
-            color:#ffc107;
-            font-size: 16px;
-        }
-
+        .stat-icon i{ color:#1d4ed8; font-size:16px; }
         .stat-title{
             margin:0;
             font-weight:900;
-            font-size: 1.05rem;
-            color: rgba(255,255,255,.92);
+            color:#111;
         }
-
         .stat-sub{
             margin:2px 0 0;
-            color: rgba(255,255,255,.60);
-            font-size: .9rem;
+            color:#6b7280;
+            font-size:.9rem;
             font-weight:600;
         }
-
         .stat-number{
-            font-size: 2.7rem;
+            font-size: 2.4rem;
             font-weight: 900;
-            color:#ffffff !important;
-            line-height: 1;
-            text-shadow: 0 2px 12px rgba(0,0,0,.60);
+            color:#111;
+            line-height:1;
         }
 
         /* ===== TABLE ===== */
         .table-wrap{
-            background: rgba(255,255,255,.03);
-            border: 1px solid rgba(255,255,255,.08);
-            border-radius: 18px;
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:18px;
             overflow:hidden;
         }
-
         .table{ margin:0; }
 
         .table thead th{
-            background: rgba(255,255,255,.04) !important;
-            color: rgba(255,255,255,.88) !important;
-            border-bottom: 1px solid rgba(255,255,255,.08) !important;
+            background:#f8fafc !important;
+            color:#111 !important;
+            border-bottom:1px solid #e5e7eb !important;
             font-weight:900;
             white-space:nowrap;
         }
-
         .table td{
-            border-top: 1px solid rgba(255,255,255,.06) !important;
+            border-top:1px solid #eef2f7 !important;
             vertical-align:middle;
             white-space:nowrap;
-            color:#fff !important;
+            color:#111 !important;
         }
 
         .badge-status{
-            background: rgba(25,135,84,.18);
-            border: 1px solid rgba(25,135,84,.35);
-            color: #a8f0c6;
-            padding: 7px 10px;
-            border-radius: 999px;
-            font-weight: 900;
-            font-size: .85rem;
+            background:#ecfdf5;
+            border:1px solid #a7f3d0;
+            color:#166534;
+            padding:7px 10px;
+            border-radius:999px;
+            font-weight:900;
+            font-size:.85rem;
             display:inline-block;
         }
 
         .btn-danger-soft{
-            background: rgba(220,53,69,.18);
-            border: 1px solid rgba(220,53,69,.35);
-            color: #ffb3b3;
-            border-radius: 14px;
-            padding: 8px 12px;
-            font-weight: 900;
+            background:#fff1f2;
+            border:1px solid #fecdd3;
+            color:#9f1239;
+            border-radius:14px;
+            padding:8px 12px;
+            font-weight:900;
         }
+        .btn-danger-soft:hover{ background:#ffe4e6; }
 
-        .btn-danger-soft:hover { filter:brightness(1.05); }
-
-        .empty {
-            color: rgba(255,255,255,.65);
+        .empty{
+            color:#6b7280;
             text-align:center;
             padding: 18px 10px;
         }
@@ -206,25 +204,28 @@
 
 <body>
 
-<div class="container py-5 wrap">
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="container wrap">
+        <div class="brand">
+            <i class="fa-solid fa-user-shield"></i>
+            <div>لوحة الإدارة</div>
+        </div>
+        <div class="subtitle">إدارة الحجوزات + تحديد أيام العطلة</div>
+    </div>
+</div>
 
-    <div class="title">
-        <i class="fa-solid fa-user-shield ms-2"></i>
-        لوحة الإدارة
-    </div>
-    <div class="subtitle">
-        إدارة الحجوزات + تحديد أيام العطلة
-    </div>
+<div class="container py-4 wrap">
 
     <!-- DATE PICKER -->
-    <div class="card card-pro p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <h5 class="mb-0 fw-bold text-warning">
-                <i class="fa-solid fa-calendar-days ms-2"></i>
+    <div class="card card-pro p-4 mb-3">
+        <div class="section-h">
+            <h5 class="section-title">
+                <i class="fa-solid fa-calendar-days"></i>
                 اختيار التاريخ
             </h5>
 
-            <a href="/" class="btn btn-outline-light">
+            <a href="/" class="btn btn-outline-clean">
                 <i class="fa-solid fa-house ms-2"></i>
                 الرئيسية
             </a>
@@ -244,9 +245,9 @@
     </div>
 
     <!-- DAYS OFF -->
-    <div class="card card-pro p-4 mb-4">
-        <h5 class="mb-3 fw-bold text-warning">
-            <i class="fa-solid fa-ban ms-2"></i>
+    <div class="card card-pro p-4 mb-3">
+        <h5 class="section-title mb-3" style="justify-content:flex-start;">
+            <i class="fa-solid fa-ban"></i>
             أيام العطلة / الإغلاق
         </h5>
 
@@ -261,7 +262,10 @@
                 <input type="text" name="reason" class="form-control" placeholder="مثال: عطلة / سفر">
             </div>
             <div class="col-md-3">
-                <button class="btn btn-gold w-100" type="submit">إضافة</button>
+                <button class="btn btn-primary-clean w-100" type="submit">
+                    <i class="fa-solid fa-plus ms-2"></i>
+                    إضافة
+                </button>
             </div>
         </form>
 
@@ -273,7 +277,7 @@
 
         <div class="table-wrap mt-2" th:if="${daysOff != null && !#lists.isEmpty(daysOff)}">
             <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle">
+                <table class="table table-hover align-middle">
                     <thead>
                     <tr>
                         <th>التاريخ</th>
@@ -301,7 +305,7 @@
     </div>
 
     <!-- STATS -->
-    <div class="stats-grid mb-4">
+    <div class="stats-grid mb-3">
         <div class="stat-card">
             <div class="stat-left">
                 <div class="stat-icon"><i class="fa-regular fa-sun"></i></div>
@@ -327,9 +331,9 @@
 
     <!-- TABLE -->
     <div class="card card-pro p-3 p-md-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <h5 class="mb-0 fw-bold text-warning">
-                <i class="fa-solid fa-list ms-2"></i>
+        <div class="section-h">
+            <h5 class="section-title">
+                <i class="fa-solid fa-list"></i>
                 الحجوزات
             </h5>
             <div class="note">يعرض الحجوزات حسب التاريخ المختار</div>
@@ -337,7 +341,7 @@
 
         <div class="table-wrap">
             <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle">
+                <table class="table table-hover align-middle">
                     <thead>
                     <tr>
                         <th>الوقت</th>
