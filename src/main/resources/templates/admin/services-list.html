@@ -1,0 +1,484 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:with="lang=${#locale.language}, rtl=${lang == 'ar' or lang == 'he'}"
+      th:lang="${lang}"
+      th:dir="${rtl} ? 'rtl' : 'ltr'">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{adminServices.pageTitle}">Manage Services</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body{ font-family:'Cairo',sans-serif; background:#f6f7f9; color:#111; }
+        .wrap{ max-width: 1100px; }
+
+        .topbar{
+            background:#fff;
+            padding: 22px 0 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .brand{ display:flex; justify-content:center; align-items:center; gap:10px; font-weight:900; }
+        .subtitle{ text-align:center; color:#6b7280; margin-top:6px; font-size:.95rem; }
+
+        .card-pro{
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:20px;
+            box-shadow:0 6px 25px rgba(0,0,0,.05);
+        }
+
+        .section-h{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            margin-bottom:14px;
+        }
+        .section-title{
+            display:flex; align-items:center; gap:10px;
+            font-weight:900; margin:0;
+        }
+
+        .form-control, .form-select{
+            border-radius:14px;
+            padding:12px;
+            border:1px solid #e5e7eb;
+        }
+
+        .btn-primary-clean{
+            background:#3b82f6; border:0; color:#fff;
+            font-weight:900; padding:10px 14px; border-radius:14px;
+            text-decoration:none;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .btn-primary-clean:hover{ background:#2563eb; }
+
+        .btn-outline-clean{
+            border-radius:14px; font-weight:900;
+            border:1px solid #cbd5e1; background:#fff; color:#111;
+            padding:10px 14px;
+            text-decoration:none;
+        }
+        .btn-outline-clean:hover{ background:#f1f5f9; }
+
+        .btn-soft{
+            border-radius:14px; font-weight:900; padding:8px 12px;
+            border:1px solid #e5e7eb; background:#fff;
+        }
+        .btn-soft-danger{ background:#fff1f2; border-color:#fecdd3; color:#9f1239; }
+        .btn-soft-danger:hover{ background:#ffe4e6; }
+        .btn-soft-warning{ background:#fffbeb; border-color:#fde68a; color:#92400e; }
+        .btn-soft-warning:hover{ background:#fef3c7; }
+        .btn-soft-primary{ background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
+        .btn-soft-primary:hover{ background:#dbeafe; }
+
+        .badge-status{
+            padding:7px 10px; border-radius:999px; font-weight:900; font-size:.85rem;
+            border:1px solid;
+            display:inline-block;
+        }
+        .badge-on{ background:#ecfdf5; border-color:#a7f3d0; color:#166534; }
+        .badge-off{ background:#f1f5f9; border-color:#cbd5e1; color:#334155; }
+
+        .table-wrap{
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:18px;
+            overflow:hidden;
+        }
+        .table thead th{
+            background:#f8fafc !important;
+            border-bottom:1px solid #e5e7eb !important;
+            font-weight:900;
+            white-space:nowrap;
+        }
+        .table td{ border-top:1px solid #eef2f7 !important; vertical-align:middle; white-space:nowrap; }
+        .note{ color:#6b7280; font-size:.9rem; }
+        .divider{ height:1px; background:#e5e7eb; margin: 16px 0; }
+        .actions{ display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
+
+        [dir="rtl"] .ms-2{ margin-left: .5rem !important; margin-right: 0 !important; }
+        [dir="ltr"] .ms-2{ margin-right: .5rem !important; margin-left: 0 !important; }
+    </style>
+</head>
+
+<body class="p-4">
+
+<div class="topbar">
+    <div class="container wrap">
+        <div class="brand" th:text="#{adminServices.title}">Manage Services</div>
+        <div class="subtitle" th:text="#{adminServices.subtitle}">Edit prices & durations + manage days off</div>
+    </div>
+</div>
+
+<div class="container wrap py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="note" th:text="#{adminServices.header.note}">Settings panel</div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/admin}" class="btn btn-outline-clean" th:text="#{adminServices.header.backAdmin}">Back to admin</a>
+            <a th:href="@{/}" class="btn btn-outline-clean" th:text="#{nav.home}">Home</a>
+        </div>
+    </div>
+
+    <!-- DAYS OFF -->
+    <div class="card-pro p-4 mb-3">
+        <div class="section-h">
+            <h5 class="section-title" th:text="#{adminServices.dayoff.title}">Days off / Closed</h5>
+            <span class="note" th:text="#{adminServices.dayoff.hint}">Choose a date to close bookings</span>
+        </div>
+
+        <form method="post" action="/admin/dayoff/add" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold" th:text="#{adminServices.dayoff.date}">Date</label>
+                <input type="date" name="offDate" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold" th:text="#{adminServices.dayoff.reason}">Reason (optional)</label>
+                <input type="text" name="reason" class="form-control"
+                       th:placeholder="#{adminServices.dayoff.reasonPh}">
+            </div>
+            <div class="col-md-3">
+                <button class="btn-primary-clean w-100" type="submit" th:text="#{adminServices.dayoff.add}">+ Add</button>
+            </div>
+        </form>
+
+        <div class="divider"></div>
+
+        <div th:if="${daysOff == null || #lists.isEmpty(daysOff)}" class="note" th:text="#{adminServices.dayoff.empty}">
+            No days off yet.
+        </div>
+
+        <div class="table-wrap mt-2" th:if="${daysOff != null && !#lists.isEmpty(daysOff)}">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle m-0">
+                    <thead>
+                    <tr>
+                        <th th:text="#{adminServices.dayoff.table.date}">Date</th>
+                        <th th:text="#{adminServices.dayoff.table.reason}">Reason</th>
+                        <th class="text-end" th:text="#{adminServices.dayoff.table.action}">Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${daysOff}">
+                        <td th:text="${d.offDate}">2026-02-18</td>
+                        <td th:text="${d.reason}">Holiday</td>
+                        <td class="text-end">
+                            <form method="post" action="/admin/dayoff/delete"
+                                  class="confirm-form"
+                                  th:attr="data-confirm=#{adminServices.confirmDeleteDayOff}"
+                                  style="display:inline;">
+                                <input type="hidden" name="offDate" th:value="${d.offDate}">
+                                <input type="hidden" name="date" th:value="${selectedDate}">
+                                <button type="submit" class="btn btn-soft btn-soft-danger" th:text="#{adminServices.delete}">
+                                    Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- WORKING HOURS -->
+    <div class="card-pro p-4 mb-3">
+        <div class="section-h">
+            <h5 class="section-title" th:text="#{adminServices.hours.title}">Working hours</h5>
+            <span class="note" th:text="#{adminServices.hours.hint}">Set open/close times</span>
+        </div>
+
+        <form method="post" action="/admin/hours/save" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold" th:text="#{adminServices.hours.open}">Open time</label>
+                <input type="time" name="openTime" class="form-control"
+                       th:value="${workingHours.openTime}" required>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold" th:text="#{adminServices.hours.close}">Close time</label>
+                <input type="time" name="closeTime" class="form-control"
+                       th:value="${workingHours.closeTime}" required>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold" th:text="#{adminServices.hours.step}">Time step (minutes)</label>
+                <select class="form-select" name="slotStepMinutes" required>
+                    <option th:selected="${workingHours.slotStepMinutes == 5}" value="5">5</option>
+                    <option th:selected="${workingHours.slotStepMinutes == 10}" value="10">10</option>
+                    <option th:selected="${workingHours.slotStepMinutes == 15}" value="15">15</option>
+                    <option th:selected="${workingHours.slotStepMinutes == 20}" value="20">20</option>
+                    <option th:selected="${workingHours.slotStepMinutes == 25}" value="25">25</option>
+                    <option th:selected="${workingHours.slotStepMinutes == 30}" value="30">30</option>
+                    <option th:selected="${workingHours.slotStepMinutes == 40}" value="40">40</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <button class="btn-primary-clean w-100" type="submit" th:text="#{adminServices.save}">Save</button>
+            </div>
+        </form>
+
+        <div class="note mt-2" th:text="#{adminServices.hours.example}">
+            Example: 10:00 - 19:00 | Step 5 minutes
+        </div>
+    </div>
+
+    <!-- SERVICES -->
+    <div class="card-pro p-4">
+        <div class="section-h">
+            <h5 class="section-title" th:text="#{adminServices.services.title}">Services</h5>
+            <a class="btn-primary-clean" th:href="@{/admin/services/new}" th:text="#{adminServices.services.add}">
+                + Add Service
+            </a>
+        </div>
+
+        <div class="table-wrap">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle m-0">
+                    <thead>
+                    <tr>
+                        <th th:text="#{adminServices.services.table.name}">Name</th>
+                        <th th:text="#{adminServices.services.table.price}">Price</th>
+                        <th th:text="#{adminServices.services.table.duration}">Duration</th>
+                        <th th:text="#{adminServices.services.table.status}">Status</th>
+                        <th class="text-end" th:text="#{adminServices.services.table.actions}">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s : ${services}">
+                        <td th:text="${
+                            lang == 'he' ? (s.nameHe != null && !s.nameHe.isBlank() ? s.nameHe : s.nameAr) :
+                            (lang == 'en' ? (s.nameEn != null && !s.nameEn.isBlank() ? s.nameEn : s.nameAr) :
+                             s.nameAr)
+                            }">Service</td>
+
+                        <td>
+                            <span th:text="${s.price}">50</span>
+                            <span th:text="#{currency.ils}">₪</span>
+                        </td>
+
+                        <td>
+                            <span th:text="${s.durationMinutes}">25</span>
+                            <span th:text="#{minutes}">minutes</span>
+                        </td>
+
+                        <td>
+                            <span class="badge-status"
+                                  th:classappend="${s.active} ? ' badge-on' : ' badge-off'"
+                                  th:text="${s.active} ? #{adminServices.status.on} : #{adminServices.status.off}">
+                                Active
+                            </span>
+                        </td>
+
+                        <td class="text-end">
+                            <div class="actions">
+                                <a class="btn btn-soft btn-soft-primary"
+                                   th:href="@{'/admin/services/edit/' + ${s.id}}"
+                                   th:text="#{adminServices.edit}">Edit</a>
+
+                                <form th:action="@{'/admin/services/toggle/' + ${s.id}}"
+                                      method="post" style="display:inline;">
+                                    <button class="btn btn-soft btn-soft-warning" type="submit"
+                                            th:text="${s.active} ? #{adminServices.disable} : #{adminServices.enable}">
+                                        Disable
+                                    </button>
+                                </form>
+
+                                <form th:action="@{'/admin/services/delete/' + ${s.id}}"
+                                      method="post"
+                                      class="confirm-form"
+                                      th:attr="data-confirm=#{adminServices.confirmDeleteService}"
+                                      style="display:inline;">
+                                    <button class="btn btn-soft btn-soft-danger" type="submit"
+                                            th:text="#{adminServices.delete}">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="note mt-3" th:text="#{adminServices.services.tip}">
+            Tip: Instead of deleting, disable to hide from booking page.
+        </div>
+    </div>
+
+    <!-- GALLERY -->
+    <div class="card-pro p-4 mt-3">
+        <div class="section-h">
+            <h5 class="section-title" th:text="#{adminServices.gallery.title}">Gallery</h5>
+            <span class="note" th:text="#{adminServices.gallery.hint}">Add or delete images shown on home</span>
+        </div>
+
+        <!-- Upload form -->
+        <form th:action="@{/admin/gallery/upload}"
+              method="post"
+              enctype="multipart/form-data"
+              id="uploadForm">
+
+            <!-- HIDDEN INPUTS (we click them from buttons) -->
+            <input id="fileGallery" type="file" name="file" accept="image/*" style="display:none;">
+            <input id="fileCamera"  type="file" name="file" accept="image/*" capture="environment" style="display:none;">
+
+            <div class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold" th:text="#{adminServices.gallery.upload}">Upload image</label>
+                    <div class="d-grid gap-2 d-md-flex">
+                        <button type="button" class="btn-outline-clean"
+                                id="btnOpenGallery"
+                                th:text="#{adminServices.gallery.chooseGallery}">
+                            Choose from Gallery
+                        </button>
+
+                        <button type="button" class="btn-outline-clean"
+                                id="btnOpenCamera"
+                                th:text="#{adminServices.gallery.takePhoto}">
+                            Take Photo (Camera)
+                        </button>
+                    </div>
+                    <div class="note mt-2" id="selectedFileText" th:text="#{adminServices.gallery.noFile}">
+                        No file selected
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <button class="btn-primary-clean w-100" type="submit"
+                            id="btnUpload"
+                            th:text="#{adminServices.gallery.uploadBtn}"
+                            disabled>
+                        Upload
+                    </button>
+                </div>
+
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-soft w-100"
+                            id="btnClear"
+                            th:text="#{adminServices.gallery.clear}">
+                        Clear
+                    </button>
+                </div>
+            </div>
+
+            <div class="note mt-2" th:text="#{adminServices.gallery.uploadTip}">
+                Tip: Use gallery or camera from phone.
+            </div>
+        </form>
+
+        <div class="divider"></div>
+
+        <!-- GALLERY GRID -->
+        <div class="row g-3" th:if="${images != null && !#lists.isEmpty(images)}">
+            <div class="col-6 col-md-3" th:each="img : ${images}">
+                <div class="card h-100">
+                    <img th:src="${img.imageUrl}"
+                         class="card-img-top"
+                         style="height:150px; object-fit:cover;"
+                         alt="gallery"
+                         onerror="this.style.display='none'; this.closest('.card').querySelector('.img-error').style.display='block';">
+
+                    <div class="p-3 text-center text-muted img-error" style="display:none;">
+                        ❌ Image not loading
+                    </div>
+
+                    <div class="card-body p-2">
+                        <form method="post"
+                              th:action="@{/admin/gallery/delete}"
+                              class="confirm-form"
+                              th:attr="data-confirm=#{adminServices.confirmDeleteImage}">
+                            <input type="hidden" name="id" th:value="${img.id}">
+                            <button class="btn btn-soft btn-soft-danger w-100" type="submit"
+                                    th:text="#{adminServices.delete}">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note mt-2" th:if="${images == null || #lists.isEmpty(images)}"
+             th:text="#{adminServices.gallery.empty}">
+            No images yet.
+        </div>
+    </div>
+
+</div>
+
+<!-- ✅ ONE confirm handler for whole page -->
+<script>
+    // Confirm delete forms
+    document.addEventListener('submit', function (e) {
+      const form = e.target.closest('.confirm-form');
+      if (!form) return;
+
+      const msg = form.getAttribute('data-confirm') || 'Are you sure?';
+      if (!confirm(msg)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+
+    // Gallery/Camera upload UI
+    (function () {
+      const fileGallery = document.getElementById('fileGallery');
+      const fileCamera  = document.getElementById('fileCamera');
+      const btnOpenGallery = document.getElementById('btnOpenGallery');
+      const btnOpenCamera  = document.getElementById('btnOpenCamera');
+      const btnUpload = document.getElementById('btnUpload');
+      const btnClear = document.getElementById('btnClear');
+      const selectedFileText = document.getElementById('selectedFileText');
+
+      function setSelectedFile(file) {
+        if (!file) {
+          selectedFileText.textContent = 'No file selected';
+          btnUpload.disabled = true;
+          return;
+        }
+        selectedFileText.textContent = file.name;
+        btnUpload.disabled = false;
+      }
+
+      btnOpenGallery.addEventListener('click', () => fileGallery.click());
+      btnOpenCamera.addEventListener('click', () => fileCamera.click());
+
+      fileGallery.addEventListener('change', () => {
+        // If gallery chosen, clear camera input so only one file is sent
+        if (fileGallery.files && fileGallery.files.length > 0) {
+          fileCamera.value = '';
+          setSelectedFile(fileGallery.files[0]);
+        } else {
+          setSelectedFile(null);
+        }
+      });
+
+      fileCamera.addEventListener('change', () => {
+        // If camera chosen, clear gallery input so only one file is sent
+        if (fileCamera.files && fileCamera.files.length > 0) {
+          fileGallery.value = '';
+          setSelectedFile(fileCamera.files[0]);
+        } else {
+          setSelectedFile(null);
+        }
+      });
+
+      btnClear.addEventListener('click', () => {
+        fileGallery.value = '';
+        fileCamera.value = '';
+        setSelectedFile(null);
+      });
+    })();
+</script>
+
+</body>
+</html>

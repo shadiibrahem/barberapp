@@ -5,8 +5,12 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.beans.factory.annotation.Value;
 import com.barber.barberapp.service.WhatsAppService;
 import com.barber.barberapp.repo.DayOffRepository;
-
-
+import com.barber.barberapp.model.WorkingHours;
+import com.barber.barberapp.repo.WorkingHoursRepository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.MessageSource;
+import java.util.Locale;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 
 import com.barber.barberapp.model.Appointment;
@@ -30,16 +34,22 @@ public class BookingController {
     private String barberWhatsapp;
     private final WhatsAppService whatsAppService;
     private final DayOffRepository dayOffRepo;
+    private final WorkingHoursRepository workingHoursRepo;
+    private final MessageSource messageSource;
 
 
     public BookingController(ServiceRepository serviceRepo,
                              AppointmentRepository appointmentRepo,
                              WhatsAppService whatsAppService,
-                             DayOffRepository dayOffRepo) {
+                             DayOffRepository dayOffRepo,
+                             WorkingHoursRepository workingHoursRepo,
+                             MessageSource messageSource) {
         this.serviceRepo = serviceRepo;
         this.appointmentRepo = appointmentRepo;
         this.whatsAppService = whatsAppService;
         this.dayOffRepo = dayOffRepo;
+        this.workingHoursRepo = workingHoursRepo;
+        this.messageSource = messageSource;
     }
 
 
@@ -58,11 +68,11 @@ public class BookingController {
 
         if (isDayOff) {
             model.addAttribute("slots", List.of()); // no slots
-            model.addAttribute("dayOffMessage", "هذا اليوم عطلة / مغلق. اختر يومًا آخر.");
+            model.addAttribute("dayOffMessage", messageSource.getMessage("dayoff.message", null, LocaleContextHolder.getLocale()));
             return "book";
         }
 
-        List<Service> services = serviceRepo.findAll();
+        List<Service> services = serviceRepo.findByActiveTrue();
         model.addAttribute("services", services);
 
         Long selectedServiceId = (serviceId == null && !services.isEmpty())
@@ -72,12 +82,11 @@ public class BookingController {
         model.addAttribute("selectedServiceId", selectedServiceId);
         model.addAttribute("selectedDate", selectedDate.toString());
 
-        // working hours
-        LocalTime open = LocalTime.of(10, 0);
-        LocalTime close = LocalTime.of(19, 0);
+        WorkingHours wh = workingHoursRepo.findById(1L).orElse(new WorkingHours());
 
-        // step for generating times (5 minutes supports 15/20/30 nicely)
-        int stepMinutes = 5;
+        LocalTime open = wh.getOpenTime();
+        LocalTime close = wh.getCloseTime();
+        int stepMinutes = wh.getSlotStepMinutes() == null ? 5 : wh.getSlotStepMinutes();
 
         // selected service duration
         int durationMinutes = 30; // fallback
@@ -119,12 +128,13 @@ public class BookingController {
 
 
     @PostMapping("/book")
+    @Transactional
     public String createBooking(@RequestParam String customerName,
                                 @RequestParam String phone,
                                 @RequestParam Long serviceId,
                                 @RequestParam String date,
                                 @RequestParam String time,
-                                Model model) {
+                                Model model,Locale locale) {
 
         Service service = serviceRepo.findById(serviceId).orElseThrow();
 
@@ -133,35 +143,48 @@ public class BookingController {
         LocalDateTime startTime = LocalDateTime.of(d, t);
         LocalDateTime endTime = startTime.plusMinutes(service.getDurationMinutes());
 
-        boolean alreadyBooked = appointmentRepo
-                .existsByStartTimeLessThanAndEndTimeGreaterThan(endTime, startTime);
+        List<Appointment> conflicts =
+                appointmentRepo.findConflictsForUpdate(startTime, endTime);
 
-        if (alreadyBooked) {
-            return "redirect:/book?date=" + date + "&serviceId=" + serviceId + "&error=1";
+        if (!conflicts.isEmpty()) {
+            return "redirect:/book?date=" + date +
+                    "&serviceId=" + serviceId + "&error=1";
         }
 
 
-        Appointment a = new Appointment(null, customerName, phone, service, startTime, endTime, "BOOKED");
+
+        Appointment a = new Appointment();
+
+        a.setCustomerName(customerName);
+        a.setPhone(phone);
+        a.setService(service);
+        a.setStartTime(startTime);
+        a.setEndTime(endTime);
+        a.setStatus("BOOKED");
+
         appointmentRepo.save(a);
 
-        String msg = "✅ تم تأكيد الحجز\n"
-                + "الاسم: " + customerName + "\n"
-                + "الخدمة: " + service.getName() + "\n"
-                + "التاريخ: " + date + "\n"
-                + "الوقت: " + time;
+        String serviceName;
+
+        if (locale.getLanguage().equals("ar")) {
+            serviceName = service.getNameAr();
+        } else if (locale.getLanguage().equals("he")) {
+            serviceName = service.getNameHe();
+        } else {
+            serviceName = service.getNameEn();
+        }
+
+        String msg = "\n✅ " + messageSource.getMessage("wa.confirm", null, locale)
+                + "\n" + messageSource.getMessage("wa.name", null, locale) + ": " + customerName
+                + "\n" + messageSource.getMessage("wa.service", null, locale) + ": " + serviceName
+                + "\n" + messageSource.getMessage("wa.date", null, locale) + ": " + date
+                + "\n" + messageSource.getMessage("wa.time", null, locale) + ": " + time;
 
         String whatsappUrl = "https://wa.me/" + barberWhatsapp
                 + "?text=" + URLEncoder.encode(msg, StandardCharsets.UTF_8);
 
         model.addAttribute("whatsappUrl", whatsappUrl);
-
-
-
         return "success";
-
-
-
-
-
     }
+
 }

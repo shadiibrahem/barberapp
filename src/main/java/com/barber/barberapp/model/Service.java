@@ -13,7 +13,11 @@ public class Service {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;          // Arabic name
+    private String nameEn;
+    private String nameAr;
+    private String nameHe;        // Arabic name
     private double price;         // e.g. 50
-    private int durationMinutes;  // 30, 60
+    private Integer durationMinutes;  // 30, 60
+    @Column(nullable = false)
+    private boolean active = true;
 }

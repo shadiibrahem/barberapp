@@ -1,0 +1,80 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:with="lang=${#locale.language}, rtl=${lang == 'ar' or lang == 'he'}"
+      th:lang="${lang}"
+      th:dir="${rtl ? 'rtl' : 'ltr'}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{settings.pageTitle}">Link Settings</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body{ font-family:'Cairo',sans-serif; background:#f6f7f9; color:#111; }
+        .wrap{ max-width: 800px; }
+        .card-pro{
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:20px;
+            box-shadow:0 6px 25px rgba(0,0,0,.05);
+        }
+        label{ font-weight:900; }
+        .btn-outline-clean{
+            border-radius:14px; font-weight:900;
+            border:1px solid #cbd5e1; background:#fff; color:#111;
+            padding:10px 14px;
+            text-decoration:none;
+        }
+        .btn-outline-clean:hover{ background:#f1f5f9; }
+        .btn-primary-clean{
+            background:#3b82f6; border:0; color:#fff;
+            font-weight:900; padding:10px 14px; border-radius:14px;
+        }
+        .btn-primary-clean:hover{ background:#2563eb; }
+        .note{ color:#6b7280; font-size:.9rem; }
+    </style>
+</head>
+
+<body>
+<div class="container wrap py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="m-0" th:text="#{settings.title}">⚙️ Link Settings</h3>
+        <a th:href="@{/admin}" class="btn btn-outline-clean" th:text="#{settings.back}">Back</a>
+    </div>
+
+    <form class="card-pro p-4" method="post" th:action="@{/admin/settings/save}">
+        <!-- CSRF (important if Spring Security enabled) -->
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+        <div class="mb-3">
+            <label class="form-label" th:text="#{settings.maps}">Google Maps link</label>
+            <input class="form-control"
+                   name="mapsLink"
+                   required
+                   th:value="${settings != null ? settings.mapsLink : ''}"
+                   placeholder="https://maps.google.com/...">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" th:text="#{settings.instagram}">Instagram link</label>
+            <input class="form-control"
+                   name="instagramLink"
+                   required
+                   th:value="${settings != null ? settings.instagramLink : ''}"
+                   placeholder="https://instagram.com/...">
+        </div>
+
+        <button class="btn-primary-clean w-100" type="submit" th:text="#{settings.save}">Save</button>
+
+        <div class="note mt-2" th:text="#{settings.note}">
+            Tip: put full links starting with https://
+        </div>
+    </form>
+
+</div>
+</body>
+</html>

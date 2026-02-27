@@ -1,9 +1,13 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html xmlns:th="http://www.thymeleaf.org"
+      th:with="lang=${#locale.language}, rtl=${lang == 'ar' or lang == 'he'}"
+      th:lang="${lang}"
+      th:dir="${rtl ? 'rtl' : 'ltr'}">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>صالون الحلاقة</title>
+    <title th:text="#{app.title}">Barber Shop</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -11,132 +15,234 @@
 
     <style>
         body{
-            font-family:'Cairo',sans-serif;
-            background:#f6f7f9;
-            color:#222;
+          font-family:'Cairo',sans-serif;
+          background:#f6f7f9;
+          color:#222;
+          margin:0;
         }
 
         .topbar{
-            background:#ffffff;
-            padding: 40px 0 24px;
-            border-bottom:1px solid #e5e7eb;
+          background:#ffffff;
+          padding: 40px 0 24px;
+          border-bottom:1px solid #e5e7eb;
+          position: relative;
         }
 
         .brand{
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap:12px;
-            font-weight:800;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          gap:12px;
+          font-weight:800;
         }
-
         .brand i{
-            color:#3b82f6;
-            font-size:26px;
+          color:#3b82f6;
+          font-size:26px;
         }
-
         .brand h1{
-            font-size:2rem;
-            margin:0;
-            color:#111;
+          font-size:2rem;
+          margin:0;
+          color:#111;
         }
-
         .subtitle{
-            text-align:center;
-            color:#6b7280;
-            margin-top:6px;
+          text-align:center;
+          color:#6b7280;
+          margin-top:6px;
         }
 
         .wrap{ max-width:900px; }
 
         .panel{
-            background:#ffffff;
-            border-radius:20px;
-            box-shadow:0 6px 25px rgba(0,0,0,.05);
-            border:1px solid #e5e7eb;
+          background:#ffffff;
+          border-radius:20px;
+          box-shadow:0 6px 25px rgba(0,0,0,.05);
+          border:1px solid #e5e7eb;
         }
 
         .section-title{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            padding:18px 18px 0;
-            font-weight:800;
-            color:#111;
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          padding:18px 18px 0;
+          font-weight:800;
+          color:#111;
         }
-
         .section-title span{
-            color:#6b7280;
-            font-size:.9rem;
+          color:#6b7280;
+          font-size:.9rem;
         }
 
         .service-card{
-            background:#fafafa;
-            border-radius:16px;
-            padding:16px;
-            height:100%;
-            border:1px solid #e5e7eb;
-            transition:.2s;
+          background:#fafafa;
+          border-radius:16px;
+          padding:16px;
+          height:100%;
+          border:1px solid #e5e7eb;
+          transition:.2s;
+          cursor:pointer;
+          user-select:none;
+          position: relative;
         }
-
         .service-card:hover{
-            transform:translateY(-2px);
-            box-shadow:0 4px 14px rgba(0,0,0,.05);
+          transform:translateY(-2px);
+          box-shadow:0 4px 14px rgba(0,0,0,.05);
+        }
+        .service-card.selected{
+          border-color: rgba(59,130,246,.6);
+          box-shadow: 0 0 0 4px rgba(59,130,246,.12);
         }
 
         .service-name{
-            font-weight:800;
-            margin-bottom:8px;
-            color:#111;
+          font-weight:800;
+          margin-bottom:8px;
+          color:#111;
         }
 
         .pill{
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
-            padding:6px 10px;
-            border-radius:999px;
-            background:#eef2ff;
-            font-size:.85rem;
-            margin-left:6px;
-            margin-bottom:6px;
-            color:#374151;
+          display:inline-flex;
+          align-items:center;
+          gap:6px;
+          padding:6px 10px;
+          border-radius:999px;
+          background:#eef2ff;
+          font-size:.85rem;
+          margin-left:6px;
+          margin-bottom:6px;
+          color:#374151;
+          line-height:1;
         }
-
         .pill i{ color:#3b82f6; }
 
         .price{
-            font-size:1.4rem;
-            font-weight:900;
-            color:#3b82f6;
-            margin-top:4px;
+          font-size:1.4rem;
+          font-weight:900;
+          color:#3b82f6;
+          margin-top:4px;
         }
 
         .cta{
-            text-align:center;
-            padding:22px;
+          text-align:center;
+          padding:22px;
         }
 
+        /* Button states */
         .btn-cta{
-            background:#3b82f6;
-            color:#fff;
-            border:0;
-            padding:12px 26px;
-            font-weight:800;
-            border-radius:14px;
-            font-size:1rem;
-            transition:.2s;
+          background:#3b82f6;
+          color:#fff;
+          border:0;
+          padding:12px 26px;
+          font-weight:800;
+          border-radius:14px;
+          font-size:1rem;
+          transition:.2s;
+          opacity:.6;
+          pointer-events:none; /* disabled until selected */
+          text-decoration:none;
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          gap:8px;
         }
-
-        .btn-cta:hover{
-            background:#2563eb;
+        .btn-cta.enabled{
+          opacity:1;
+          pointer-events:auto;
         }
+        .btn-cta:hover{ background:#2563eb; }
 
         .note{
-            text-align:center;
-            color:#6b7280;
-            font-size:.9rem;
-            margin-top:10px;
+          text-align:center;
+          color:#6b7280;
+          font-size:.9rem;
+          margin-top:10px;
+        }
+
+        .gallery-img{
+          height: 140px;
+          object-fit: cover;
+        }
+
+        .icon-btn{
+          width:52px;
+          height:46px;
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          border-radius:14px;
+          border:1px solid #e5e7eb;
+          background:#fff;
+          font-size:20px;
+          text-decoration:none;
+          transition:.2s;
+        }
+        .icon-btn:hover{
+          transform:translateY(-1px);
+          box-shadow:0 6px 18px rgba(0,0,0,.08);
+        }
+        .instagram-btn i{
+          font-size:22px;
+          color:#E1306C;
+        }
+
+        /* better spacing in RTL */
+        [dir="rtl"] .pill{ margin-left:0; margin-right:6px; }
+
+        /* =========================
+           LANGUAGE DROPDOWN (HIDDEN)
+           ========================= */
+        .lang-wrapper{
+          position:absolute;
+          top:18px;
+          z-index:9999;
+        }
+        /* auto corner */
+        [dir="rtl"] .lang-wrapper{ right:18px; }
+        [dir="ltr"] .lang-wrapper{ left:18px; }
+
+        .lang-toggle{
+          width:44px;
+          height:44px;
+          border-radius:14px;
+          border:1px solid #e5e7eb;
+          background:#fff;
+          cursor:pointer;
+          font-size:18px;
+          box-shadow:0 6px 18px rgba(0,0,0,.08);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+        }
+        .lang-toggle:hover{
+          transform: translateY(-1px);
+        }
+
+        .lang-menu{
+          position:absolute;
+          top:54px;
+          background:#fff;
+          border:1px solid #e5e7eb;
+          border-radius:14px;
+          padding:8px;
+          display:none; /* hidden by default */
+          flex-direction:column;
+          gap:6px;
+          min-width:74px;
+          box-shadow:0 10px 25px rgba(0,0,0,.10);
+        }
+        [dir="rtl"] .lang-menu{ right:0; }
+        [dir="ltr"] .lang-menu{ left:0; }
+
+        .lang-menu a{
+          text-decoration:none;
+          padding:7px 10px;
+          border-radius:12px;
+          font-weight:900;
+          color:#111;
+          border:1px solid #e5e7eb;
+          text-align:center;
+          font-size:12px;
+        }
+        .lang-menu a:hover{
+          background:#f1f5f9;
         }
     </style>
 </head>
@@ -146,46 +252,68 @@
 <!-- TOP BAR -->
 <div class="topbar">
     <div class="container wrap">
+
         <div class="brand">
             <i class="fa-solid fa-scissors"></i>
-            <h1>صالون الحلاقة</h1>
+            <h1 th:text="#{app.title}">Barber Shop</h1>
             <i class="fa-solid fa-pole-barber"></i>
         </div>
-        <div class="subtitle">احجز موعدك بسهولة — تأكيد سريع عبر واتساب</div>
+
+        <div class="subtitle" th:text="#{app.subtitle}">
+            Book your appointment easily — Fast WhatsApp confirmation
+        </div>
+
+        <!-- LANGUAGE DROPDOWN -->
+        <div class="lang-wrapper">
+            <button type="button" class="lang-toggle" id="langToggle" aria-label="language">🌐</button>
+
+            <div class="lang-menu" id="langMenu">
+                <a th:href="@{/(lang='ar')}">AR</a>
+                <a th:href="@{/(lang='he')}">HE</a>
+                <a th:href="@{/(lang='en')}">EN</a>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <!-- CONTENT -->
 <div class="container wrap my-4">
 
+    <!-- SERVICES PANEL -->
     <div class="panel p-3 p-md-4">
         <div class="section-title">
-            <div>الخدمات</div>
-            <span>اختر الخدمة المناسبة ثم احجز</span>
+            <div th:text="#{home.services}">Services</div>
+            <span th:text="#{home.servicesHint}">Choose a service then book</span>
         </div>
 
         <div class="p-3 pt-2">
             <div class="row g-3">
 
-                <!-- CARD: 반복 لكل خدمة -->
                 <div class="col-md-4" th:each="s : ${services}">
-                    <div class="service-card">
-                        <div class="service-name" th:text="${s.name}">قص شعر</div>
+                    <div class="service-card" th:attr="data-id=${s.id}">
+
+                        <div class="service-name"
+                             th:text="${
+                                (lang == 'he'
+                                  ? (s.nameHe != null && !s.nameHe.isBlank() ? s.nameHe : s.nameAr)
+                                  : (lang == 'en'
+                                      ? (s.nameEn != null && !s.nameEn.isBlank() ? s.nameEn : s.nameAr)
+                                      : s.nameAr)
+                                )
+                             }">
+                            Haircut
+                        </div>
 
                         <div class="d-flex flex-wrap">
-                            <div class="pill">
-                                <i class="fa-regular fa-clock"></i>
-                                <span th:text="${s.durationMinutes + ' دقيقة'}">20 دقيقة</span>
-                            </div>
-                            <div class="pill">
-                                <i class="fa-solid fa-scissors text-primary"></i>
-                                <span>سعر الخدمة</span>
-                            </div>
+
                         </div>
 
                         <div class="price">
-                            <span th:text="${s.price}">50</span> ₪
+                            <span th:text="${s.price}">50</span>
+                            <span th:text="#{currency.ils}">₪</span>
                         </div>
+
                     </div>
                 </div>
 
@@ -193,18 +321,125 @@
         </div>
 
         <div class="cta">
-            <a href="/book" class="btn btn-cta">
+            <a id="bookBtn" class="btn-cta" href="#">
                 <i class="fa-solid fa-calendar-check ms-2"></i>
-                احجز الآن
+                <span th:text="#{home.bookNow}">Book Now</span>
             </a>
-            <div class="note">
-                ساعات العمل: 10:00 - 19:00 • الرجاء الحضور قبل الموعد بـ 5 دقائق
-            </div>
+
+        </div>
+    </div>
+
+    <!-- GALLERY -->
+    <div class="panel p-3 p-md-4 mt-4">
+        <div class="section-title">
+            <div th:text="#{home.gallery}">📸 Gallery</div>
+            <span th:text="#{home.galleryHint}">Admin can add images from dashboard</span>
         </div>
 
+        <div class="p-3 pt-2">
+            <div class="row g-3" th:if="${gallery != null && !#lists.isEmpty(gallery)}">
+                <div class="col-6 col-md-3" th:each="img : ${gallery}">
+                    <img th:src="${img.imageUrl}"
+                         class="img-fluid rounded shadow-sm gallery-img w-100"
+                         alt="gallery">
+                </div>
+            </div>
+
+            <div th:if="${gallery == null || #lists.isEmpty(gallery)}" class="service-card text-center">
+                <div class="fw-bold mb-1" th:text="#{home.noImages}">No images yet</div>
+                <div class="text-muted" th:text="#{home.galleryHint}">Admin can add images from dashboard</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="panel p-3 p-md-4 mt-4 mb-5">
+        <div class="section-title">
+            <div th:text="#{home.contact}">📍 Contact</div>
+            <span th:text="#{home.contactHint}">Follow us or visit</span>
+        </div>
+
+        <div class="p-3 pt-2 text-center">
+            <div class="d-flex gap-3 justify-content-center align-items-center">
+
+                <a class="icon-btn"
+                   th:href="${settings != null ? settings.mapsLink : '#'}"
+                   target="_blank"
+                   th:title="#{btn.map}"
+                   aria-label="map">📍</a>
+
+                <a class="icon-btn instagram-btn"
+                   th:href="${settings != null ? settings.instagramLink : '#'}"
+                   target="_blank"
+                   th:title="#{btn.instagram}"
+                   aria-label="instagram">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+
+            </div>
+
+            <div class="text-muted mt-3" style="font-size:.9rem" th:text="#{home.changeLinks}">
+                Links can be changed from admin dashboard
+            </div>
+        </div>
     </div>
 
 </div>
+
+<!-- ✅ JS (NO thymeleaf inline needed here) -->
+<script>
+    let selectedServiceId = null;
+    const currentLang = document.documentElement.lang || "ar";
+
+    // select service
+    document.addEventListener('click', function(e) {
+        const card = e.target.closest('.service-card[data-id]');
+        if (!card) return;
+
+        document.querySelectorAll('.service-card[data-id]').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+
+        selectedServiceId = card.getAttribute('data-id');
+
+        const btn = document.getElementById('bookBtn');
+        btn.classList.add('enabled');
+        btn.style.pointerEvents = 'auto';
+        btn.style.opacity = '1';
+
+        btn.href = '/book?serviceId=' + encodeURIComponent(selectedServiceId)
+            + '&lang=' + encodeURIComponent(currentLang);
+    });
+
+    // safety click
+    document.getElementById('bookBtn').addEventListener('click', function(e) {
+        if (!selectedServiceId) {
+            e.preventDefault();
+            alert('Select a service first');
+        }
+    });
+
+    // language menu toggle
+    const langToggle = document.getElementById('langToggle');
+    const langMenu = document.getElementById('langMenu');
+
+    function openLangMenu(){
+        langMenu.style.display = 'flex';
+    }
+    function closeLangMenu(){
+        langMenu.style.display = 'none';
+    }
+
+    langToggle.addEventListener('click', function(e){
+        e.stopPropagation();
+        if (langMenu.style.display === 'flex') closeLangMenu();
+        else openLangMenu();
+    });
+
+    // click outside closes menu
+    window.addEventListener('click', function(){
+        closeLangMenu();
+    });
+</script>
 
 </body>
 </html>

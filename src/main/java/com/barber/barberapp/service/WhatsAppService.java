@@ -20,7 +20,7 @@ public class WhatsAppService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public void sendTextMessage(String toDigitsOnly, String text) {
-        String url = "https://graph.facebook.com/v20.0/" + phoneNumberId + "/messages";
+        String url = "https://graph.facebook.com/v20.0/" + phoneNumberId + "/d";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

@@ -1,9 +1,12 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html xmlns:th="http://www.thymeleaf.org"
+      th:with="lang=${#locale.language}, rtl=${lang == 'ar' or lang == 'he'}"
+      th:lang="${lang}"
+      th:dir="${rtl} ? 'rtl' : 'ltr'">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الإدارة</title>
+    <title th:text="#{admin.pageTitle}">Admin Dashboard</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -72,17 +75,6 @@
             box-shadow:0 0 0 3px rgba(59,130,246,.15);
         }
 
-        .btn-primary-clean{
-            background:#3b82f6;
-            border:0;
-            color:#fff;
-            font-weight:900;
-            padding:12px 14px;
-            border-radius:14px;
-            transition:.2s;
-        }
-        .btn-primary-clean:hover{ background:#2563eb; }
-
         .btn-outline-clean{
             border-radius:14px;
             font-weight:900;
@@ -90,16 +82,10 @@
             background:#fff;
             color:#111;
             padding:10px 14px;
+            text-decoration:none;
         }
         .btn-outline-clean:hover{ background:#f1f5f9; }
 
-        .divider{
-            height:1px;
-            background:#e5e7eb;
-            margin: 18px 0;
-        }
-
-        /* ===== STATS ===== */
         .stats-grid{
             display:grid;
             grid-template-columns: 1fr 1fr;
@@ -150,7 +136,6 @@
             line-height:1;
         }
 
-        /* ===== TABLE ===== */
         .table-wrap{
             background:#fff;
             border:1px solid #e5e7eb;
@@ -199,119 +184,68 @@
             text-align:center;
             padding: 18px 10px;
         }
+
+        [dir="rtl"] .ms-2{ margin-left: .5rem !important; margin-right: 0 !important; }
+        [dir="ltr"] .ms-2{ margin-right: .5rem !important; margin-left: 0 !important; }
     </style>
 </head>
 
 <body>
 
-<!-- TOP BAR -->
 <div class="topbar">
     <div class="container wrap">
         <div class="brand">
             <i class="fa-solid fa-user-shield"></i>
-            <div>لوحة الإدارة</div>
+            <div th:text="#{admin.title}">Admin Dashboard</div>
         </div>
-        <div class="subtitle">إدارة الحجوزات + تحديد أيام العطلة</div>
+        <div class="subtitle" th:text="#{admin.subtitle}">Manage bookings and days off</div>
     </div>
+</div>
+
+<div class="text-center my-3">
+    <a th:href="@{/admin/services}" class="btn btn-primary btn-lg" th:text="#{admin.manageServices}">
+        Manage Services
+    </a>
+    <a th:href="@{/admin/settings}" class="btn btn-dark" th:text="#{admin.linkSettings}">
+        ⚙️ Link Settings
+    </a>
 </div>
 
 <div class="container py-4 wrap">
 
-    <!-- DATE PICKER -->
     <div class="card card-pro p-4 mb-3">
         <div class="section-h">
             <h5 class="section-title">
                 <i class="fa-solid fa-calendar-days"></i>
-                اختيار التاريخ
+                <span th:text="#{admin.chooseDateTitle}">Choose date</span>
             </h5>
 
-            <a href="/" class="btn btn-outline-clean">
+            <a th:href="@{/}" class="btn btn-outline-clean">
                 <i class="fa-solid fa-house ms-2"></i>
-                الرئيسية
+                <span th:text="#{nav.home}">Home</span>
             </a>
         </div>
 
         <form method="get" action="/admin" id="adminAutoForm">
-            <label class="form-label">التاريخ</label>
+            <label class="form-label" th:text="#{admin.date}">Date</label>
             <input class="form-control"
                    type="date"
                    name="date"
                    id="adminDateInput"
                    th:value="${selectedDate}">
-            <div class="note mt-2">
-                سيتم تحديث صفحة الإدارة تلقائيًا عند تغيير التاريخ.
+            <div class="note mt-2" th:text="#{admin.autoRefreshNote}">
+                Page refreshes automatically when date changes.
             </div>
         </form>
     </div>
 
-    <!-- DAYS OFF -->
-    <div class="card card-pro p-4 mb-3">
-        <h5 class="section-title mb-3" style="justify-content:flex-start;">
-            <i class="fa-solid fa-ban"></i>
-            أيام العطلة / الإغلاق
-        </h5>
-
-        <!-- Add day off -->
-        <form method="post" action="/admin/dayoff/add" class="row g-2 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label">التاريخ</label>
-                <input type="date" name="offDate" class="form-control" required>
-            </div>
-            <div class="col-md-5">
-                <label class="form-label">سبب (اختياري)</label>
-                <input type="text" name="reason" class="form-control" placeholder="مثال: عطلة / سفر">
-            </div>
-            <div class="col-md-3">
-                <button class="btn btn-primary-clean w-100" type="submit">
-                    <i class="fa-solid fa-plus ms-2"></i>
-                    إضافة
-                </button>
-            </div>
-        </form>
-
-        <div class="divider"></div>
-
-        <div th:if="${daysOff == null || #lists.isEmpty(daysOff)}" class="note">
-            لا يوجد أيام عطلة حتى الآن.
-        </div>
-
-        <div class="table-wrap mt-2" th:if="${daysOff != null && !#lists.isEmpty(daysOff)}">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
-                    <tr>
-                        <th>التاريخ</th>
-                        <th>السبب</th>
-                        <th>حذف</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="d : ${daysOff}">
-                        <td th:text="${d.offDate}">2026-02-18</td>
-                        <td th:text="${d.reason}">عطلة</td>
-                        <td>
-                            <form method="post" action="/admin/dayoff/delete"
-                                  onsubmit="return confirm('حذف يوم العطلة؟');">
-                                <input type="hidden" name="offDate" th:value="${d.offDate}">
-                                <input type="hidden" name="date" th:value="${selectedDate}">
-                                <button type="submit" class="btn-danger-soft">حذف</button>
-                            </form>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- STATS -->
     <div class="stats-grid mb-3">
         <div class="stat-card">
             <div class="stat-left">
                 <div class="stat-icon"><i class="fa-regular fa-sun"></i></div>
                 <div>
-                    <p class="stat-title">حجوزات اليوم</p>
-                    <p class="stat-sub">عدد الحجوزات لهذا اليوم</p>
+                    <p class="stat-title" th:text="#{admin.stats.today}">Today bookings</p>
+                    <p class="stat-sub" th:text="#{admin.stats.todaySub}">Bookings count for this day</p>
                 </div>
             </div>
             <div class="stat-number" th:text="${dailyCount}">0</div>
@@ -321,22 +255,21 @@
             <div class="stat-left">
                 <div class="stat-icon"><i class="fa-regular fa-calendar"></i></div>
                 <div>
-                    <p class="stat-title">حجوزات هذا الأسبوع</p>
-                    <p class="stat-sub">عدد الحجوزات خلال 7 أيام</p>
+                    <p class="stat-title" th:text="#{admin.stats.week}">This week bookings</p>
+                    <p class="stat-sub" th:text="#{admin.stats.weekSub}">Bookings count in 7 days</p>
                 </div>
             </div>
             <div class="stat-number" th:text="${weeklyCount}">0</div>
         </div>
     </div>
 
-    <!-- TABLE -->
     <div class="card card-pro p-3 p-md-4">
         <div class="section-h">
             <h5 class="section-title">
                 <i class="fa-solid fa-list"></i>
-                الحجوزات
+                <span th:text="#{admin.table.title}">Appointments</span>
             </h5>
-            <div class="note">يعرض الحجوزات حسب التاريخ المختار</div>
+            <div class="note" th:text="#{admin.table.hint}">Shows appointments for selected date</div>
         </div>
 
         <div class="table-wrap">
@@ -344,34 +277,48 @@
                 <table class="table table-hover align-middle">
                     <thead>
                     <tr>
-                        <th>الوقت</th>
-                        <th>الخدمة</th>
-                        <th>المدة</th>
-                        <th>الاسم</th>
-                        <th>الهاتف</th>
-                        <th>الحالة</th>
-                        <th>حذف</th>
+                        <th th:text="#{admin.table.time}">Time</th>
+                        <th th:text="#{admin.table.service}">Service</th>
+                        <th th:text="#{admin.table.duration}">Duration</th>
+                        <th th:text="#{admin.table.name}">Name</th>
+                        <th th:text="#{admin.table.phone}">Phone</th>
+                        <th th:text="#{admin.table.status}">Status</th>
+                        <th th:text="#{admin.table.delete}">Delete</th>
                     </tr>
                     </thead>
 
                     <tbody>
                     <tr th:if="${appointments == null || #lists.isEmpty(appointments)}">
-                        <td colspan="7" class="empty">لا توجد حجوزات في هذا التاريخ.</td>
+                        <td colspan="7" class="empty" th:text="#{admin.table.empty}">No appointments.</td>
                     </tr>
 
                     <tr th:each="a : ${appointments}">
                         <td th:text="${#temporals.format(a.startTime, 'HH:mm')}">10:00</td>
-                        <td th:text="${a.service.name}">قص شعر</td>
-                        <td th:text="${a.service.durationMinutes + ' دقيقة'}">20 دقيقة</td>
-                        <td th:text="${a.customerName}">أحمد</td>
+
+                        <td th:text="${
+                                (lang == 'he'
+                                 ? (a.service.nameHe != null && !a.service.nameHe.isBlank() ? a.service.nameHe : a.service.nameAr)
+                                 : (lang == 'en'
+                                    ? (a.service.nameEn != null && !a.service.nameEn.isBlank() ? a.service.nameEn : a.service.nameAr)
+                                    : a.service.nameAr)
+                                )
+                            }">Service</td>
+
+                        <td th:text="${a.service.durationMinutes + ' ' + #messages.msg('minutes')}">25 minutes</td>
+                        <td th:text="${a.customerName}">Ahmed</td>
                         <td th:text="${a.phone}">05xxxxxxxx</td>
                         <td><span class="badge-status" th:text="${a.status}">BOOKED</span></td>
+
                         <td>
+                            <!-- ✅ FIXED: no th:onsubmit -->
                             <form method="post" action="/admin/delete"
-                                  onsubmit="return confirm('هل أنت متأكد من حذف الحجز؟');">
+                                  class="confirm-form"
+                                  th:attr="data-confirm=#{admin.confirmDelete}">
                                 <input type="hidden" name="id" th:value="${a.id}">
                                 <input type="hidden" name="date" th:value="${selectedDate}">
-                                <button type="submit" class="btn-danger-soft">حذف</button>
+                                <button type="submit" class="btn-danger-soft" th:text="#{admin.table.deleteBtn}">
+                                    Delete
+                                </button>
                             </form>
                         </td>
                     </tr>
@@ -391,8 +338,21 @@
     function autoSubmitAdmin(){
         adminAutoForm.submit();
     }
-
     adminDateInput.addEventListener('change', autoSubmitAdmin);
+</script>
+
+<!-- ✅ Confirm handler (for delete forms) -->
+<script>
+    document.addEventListener('submit', function (e) {
+      const form = e.target.closest('.confirm-form');
+      if (!form) return;
+
+      const msg = form.getAttribute('data-confirm') || 'Are you sure?';
+      if (!confirm(msg)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
 </script>
 
 </body>

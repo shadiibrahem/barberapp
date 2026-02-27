@@ -1,0 +1,100 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:with="lang=${#locale.language}, rtl=${lang == 'ar' or lang == 'he'}"
+      th:lang="${lang}"
+      th:dir="${rtl} ? 'rtl' : 'ltr'}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{serviceForm.pageTitle}">Service</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body{ font-family:'Cairo',sans-serif; background:#f6f7f9; }
+        .card{ border-radius:18px; }
+        label{ font-weight:800; }
+        .hint{ color:#6b7280; font-size:.9rem; }
+    </style>
+</head>
+
+<body class="p-4">
+
+<div class="container" style="max-width: 700px;">
+
+    <h3 class="mb-2"
+        th:text="${mode == 'create'} ? #{serviceForm.createTitle} : #{serviceForm.editTitle}">
+        Add / Edit Service
+    </h3>
+    <div class="hint mb-3" th:text="#{serviceForm.langHint}">
+        You are editing the name in the current language.
+    </div>
+
+    <div class="card p-4">
+        <form th:action="${mode == 'create'} ? @{/admin/services} : @{'/admin/services/edit/' + ${service.id}}"
+              method="post">
+
+            <!-- =========================
+                 NAME INPUT (ONLY ONE VISIBLE)
+                 ========================= -->
+
+            <!-- Arabic -->
+            <div class="mb-3" th:if="${lang == 'ar'}">
+                <label class="form-label" th:text="#{serviceForm.nameAr}">Service name (Arabic)</label>
+                <input class="form-control" name="nameAr" required th:value="${service.nameAr}">
+            </div>
+
+            <!-- English -->
+            <div class="mb-3" th:if="${lang == 'en'}">
+                <label class="form-label" th:text="#{serviceForm.nameEn}">Service name (English)</label>
+                <input class="form-control" name="nameEn" required th:value="${service.nameEn}">
+            </div>
+
+            <!-- Hebrew -->
+            <div class="mb-3" th:if="${lang == 'he'}">
+                <label class="form-label" th:text="#{serviceForm.nameHe}">Service name (Hebrew)</label>
+                <input class="form-control" name="nameHe" required th:value="${service.nameHe}">
+            </div>
+
+            <!-- Hidden inputs to keep the other names (so they don't get erased) -->
+            <input type="hidden" name="nameAr" th:if="${lang != 'ar'}" th:value="${service.nameAr}">
+            <input type="hidden" name="nameEn" th:if="${lang != 'en'}" th:value="${service.nameEn}">
+            <input type="hidden" name="nameHe" th:if="${lang != 'he'}" th:value="${service.nameHe}">
+
+            <!-- =========================
+                 PRICE / DURATION
+                 ========================= -->
+            <div class="mb-3">
+                <label class="form-label" th:text="#{serviceForm.price}">Price (₪)</label>
+                <input class="form-control" type="number" name="price" min="0" step="1"
+                       required th:value="${service.price}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" th:text="#{serviceForm.duration}">Duration (minutes)</label>
+                <input class="form-control" type="number" name="durationMinutes" min="5" step="5"
+                       required th:value="${service.durationMinutes}">
+            </div>
+
+            <div class="mb-3 form-check">
+                <input class="form-check-input" type="checkbox" name="active"
+                       th:checked="${service.active}">
+                <label class="form-check-label" th:text="#{serviceForm.active}">Active</label>
+            </div>
+
+            <button class="btn btn-primary w-100" type="submit" th:text="#{serviceForm.save}">
+                Save
+            </button>
+        </form>
+    </div>
+
+    <div class="mt-3">
+        <a class="btn btn-outline-secondary" th:href="@{/admin/services}" th:text="#{serviceForm.back}">
+            Back
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

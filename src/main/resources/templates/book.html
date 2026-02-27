@@ -1,9 +1,12 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html xmlns:th="http://www.thymeleaf.org"
+      th:with="lang=${#locale.language}, rtl=${lang == 'ar' or lang == 'he'}"
+      th:lang="${lang}"
+      th:dir="${rtl} ? 'rtl' : 'ltr'">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حجز موعد</title>
+    <title th:text="#{book.pageTitle}">Book Appointment</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -112,6 +115,11 @@
         .is-disabled{
             opacity:.75;
         }
+
+        /* RTL/LTR icon spacing */
+        [dir="rtl"] .ms-2{ margin-left: .5rem !important; margin-right: 0 !important; }
+        [dir="ltr"] .ms-2{ margin-right: .5rem !important; margin-left: 0 !important; }
+
     </style>
 </head>
 
@@ -122,36 +130,49 @@
     <div class="container wrap">
         <div class="brand">
             <i class="fa-solid fa-calendar-check"></i>
-            <div>حجز موعد</div>
+            <div th:text="#{book.title}">Book Appointment</div>
         </div>
-        <div class="subtitle">اختر الخدمة والتاريخ ثم أكد الحجز بسهولة</div>
+        <div class="subtitle" th:text="#{book.subtitle}">
+            Choose service and date then confirm booking easily
+        </div>
     </div>
 </div>
 
 <div class="container py-4 wrap">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a th:href="@{/}" class="btn btn-outline-clean">
+            <i class="fa-solid fa-house ms-2"></i>
+            <span th:text="#{nav.home}">Home</span>
+        </a>
+
+        <a th:href="@{/admin}" class="btn btn-outline-clean">
+            <i class="fa-solid fa-user-shield ms-2"></i>
+            <span th:text="#{nav.admin}">Admin</span>
+        </a>
+    </div>
 
     <!-- error (booked or dayoff) -->
     <div th:if="${param.error}" class="alert alert-error text-center mb-3">
         <i class="fa-solid fa-circle-xmark ms-2"></i>
-        هذا الوقت غير متاح، اختر وقتًا آخر.
+        <span th:text="#{book.error.notAvailable}">This time is not available.</span>
     </div>
 
     <!-- Day off message -->
     <div th:if="${isDayOff}" class="alert alert-info-clean text-center mb-3">
         <i class="fa-solid fa-ban ms-2"></i>
-        <span th:text="${dayOffMessage}">هذا اليوم عطلة / مغلق. اختر يومًا آخر.</span>
+        <span th:text="${dayOffMessage}">Closed. Choose another day.</span>
     </div>
 
     <!-- STEP 1 -->
     <div class="card card-pro p-4 mb-3">
         <div class="section-h">
             <i class="fa-solid fa-calendar-days"></i>
-            <span>اختيار الخدمة والتاريخ</span>
+            <span th:text="#{book.step1.title}">Select service & date</span>
         </div>
 
         <form method="get" action="/book" id="autoForm">
             <div class="mb-3">
-                <label class="form-label">التاريخ</label>
+                <label class="form-label" th:text="#{book.date}">Date</label>
                 <input class="form-control"
                        type="date"
                        name="date"
@@ -160,19 +181,26 @@
             </div>
 
             <div class="mb-2">
-                <label class="form-label">الخدمة</label>
+                <label class="form-label" th:text="#{book.service}">Service</label>
                 <select class="form-select" name="serviceId" id="serviceSelect">
                     <option th:each="s : ${services}"
                             th:value="${s.id}"
                             th:selected="${s.id == selectedServiceId}"
-                            th:text="${s.name + ' - ' + s.price + ' ₪'}">
+                            th:text="${
+                                (#locale.language == 'he'
+                                ? (s.nameHe != null && !s.nameHe.isBlank() ? s.nameHe : s.nameAr)
+                                : (#locale.language == 'en'
+                                ? (s.nameEn != null && !s.nameEn.isBlank() ? s.nameEn : s.nameAr)
+                                : s.nameAr)
+                                ) + ' - ' + s.price + ' ₪'
+                                }">
                     </option>
                 </select>
             </div>
         </form>
 
-        <div class="note mt-2">
-            يتم تحديث الأوقات تلقائيًا عند تغيير التاريخ أو الخدمة.
+        <div class="note mt-2" th:text="#{book.note.autoUpdate}">
+            Times update automatically when date or service changes.
         </div>
     </div>
 
@@ -180,7 +208,7 @@
     <div class="card card-pro p-4" th:classappend="${isDayOff} ? ' is-disabled' : ''">
         <div class="section-h">
             <i class="fa-solid fa-user-check"></i>
-            <span>أدخل بياناتك</span>
+            <span th:text="#{book.step2.title}">Enter your details</span>
         </div>
 
         <form method="post" action="/book">
@@ -189,39 +217,39 @@
             <input type="hidden" name="serviceId" id="hiddenServiceId" th:value="${selectedServiceId}">
 
             <div class="mb-3">
-                <label class="form-label">الاسم</label>
+                <label class="form-label" th:text="#{book.name}">Name</label>
                 <input class="form-control" name="customerName" required th:disabled="${isDayOff}">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">رقم الهاتف</label>
+                <label class="form-label" th:text="#{book.phone}">Phone</label>
                 <input class="form-control" name="phone" required th:disabled="${isDayOff}">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">الوقت المتاح</label>
+                <label class="form-label" th:text="#{book.time}">Available time</label>
                 <select class="form-select" name="time" required th:disabled="${isDayOff}">
-                    <option value="" disabled selected>اختر وقتًا</option>
+                    <option value="" disabled selected th:text="#{book.chooseTime}">Choose a time</option>
                     <option th:each="t : ${slots}" th:value="${t}" th:text="${t}"></option>
                 </select>
 
-                <div class="note mt-2">
-                    إذا لم تظهر أوقات، غيّر الخدمة أو التاريخ وسيتم تحديثها تلقائيًا.
+                <div class="note mt-2" th:text="#{book.note.noSlots}">
+                    If no times appear, change service or date.
                 </div>
             </div>
 
             <button class="btn btn-primary-clean w-100" th:disabled="${isDayOff}">
                 <i class="fa-solid fa-check ms-2"></i>
-                تأكيد الحجز
+                <span th:text="#{book.confirm}">Confirm booking</span>
             </button>
 
         </form>
     </div>
 
     <div class="text-center mt-3">
-        <a href="/" class="btn btn-outline-clean">
+        <a th:href="@{/}" class="btn btn-outline-clean">
             <i class="fa-solid fa-arrow-right ms-2"></i>
-            الرجوع للرئيسية
+            <span th:text="#{nav.backHome}">Back Home</span>
         </a>
     </div>
 
