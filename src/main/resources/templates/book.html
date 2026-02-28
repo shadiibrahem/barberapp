@@ -212,6 +212,7 @@
         </div>
 
         <form method="post" action="/book">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
             <input type="hidden" name="date" id="hiddenDate" th:value="${selectedDate}">
             <input type="hidden" name="serviceId" id="hiddenServiceId" th:value="${selectedServiceId}">
