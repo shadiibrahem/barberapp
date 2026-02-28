@@ -38,13 +38,20 @@ public class AdminServiceController {
         model.addAttribute("services", serviceRepo.findAll());
         model.addAttribute("daysOff", dayOffRepo.findAll());
         model.addAttribute("selectedDate", LocalDate.now().toString());
-        model.addAttribute("workingHours",
-                workingHoursRepo.findById(1L).orElse(new WorkingHours()));
 
-        // ? IMPORTANT: gallery images for your services-list.html
+        WorkingHours wh = workingHoursRepo.findById(1L).orElse(null);
+        if (wh == null) {
+            wh = new WorkingHours();
+            // ✅ SAFE DEFAULTS
+            wh.setOpenTime(java.time.LocalTime.of(10, 0));
+            wh.setCloseTime(java.time.LocalTime.of(19, 0));
+            wh.setSlotStepMinutes(10);
+        }
+        model.addAttribute("workingHours", wh);
+
         model.addAttribute("images", galleryImageRepo.findByActiveTrueOrderByIdDesc());
 
-        return "admin/services-list"; // ? templates/admin/services-list.html
+        return "admin/services-list";
     }
 
     // 2) Create form
@@ -74,10 +81,14 @@ public class AdminServiceController {
     // 4) Edit form
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Long id, Model model) {
-        Service service = serviceRepo.findById(id).orElseThrow();
-        model.addAttribute("service", service);
-        model.addAttribute("mode", "edit");
-        return "admin/service-form";
+
+        return serviceRepo.findById(id)
+                .map(service -> {
+                    model.addAttribute("service", service);
+                    model.addAttribute("mode", "edit");
+                    return "admin/service-form";
+                })
+                .orElse("redirect:/admin/services?error=serviceNotFound");
     }
 
     // 5) Edit submit

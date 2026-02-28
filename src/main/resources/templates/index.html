@@ -333,7 +333,6 @@
     <div class="panel p-3 p-md-4 mt-4">
         <div class="section-title">
             <div th:text="#{home.gallery}">📸 Gallery</div>
-            <span th:text="#{home.galleryHint}">Admin can add images from dashboard</span>
         </div>
 
         <div class="p-3 pt-2">
@@ -347,7 +346,6 @@
 
             <div th:if="${gallery == null || #lists.isEmpty(gallery)}" class="service-card text-center">
                 <div class="fw-bold mb-1" th:text="#{home.noImages}">No images yet</div>
-                <div class="text-muted" th:text="#{home.galleryHint}">Admin can add images from dashboard</div>
             </div>
         </div>
     </div>
@@ -356,7 +354,6 @@
     <div class="panel p-3 p-md-4 mt-4 mb-5">
         <div class="section-title">
             <div th:text="#{home.contact}">📍 Contact</div>
-            <span th:text="#{home.contactHint}">Follow us or visit</span>
         </div>
 
         <div class="p-3 pt-2 text-center">
@@ -379,7 +376,7 @@
             </div>
 
             <div class="text-muted mt-3" style="font-size:.9rem" th:text="#{home.changeLinks}">
-                Links can be changed from admin dashboard
+
             </div>
         </div>
     </div>

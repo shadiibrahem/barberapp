@@ -234,9 +234,7 @@
                     <option th:each="t : ${slots}" th:value="${t}" th:text="${t}"></option>
                 </select>
 
-                <div class="note mt-2" th:text="#{book.note.noSlots}">
-                    If no times appear, change service or date.
-                </div>
+
             </div>
 
             <button class="btn btn-primary-clean w-100" th:disabled="${isDayOff}">

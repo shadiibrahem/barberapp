@@ -141,9 +141,18 @@ public class AdminController {
     @PostMapping("/admin/dayoff/delete")
     public String deleteDayOff(@RequestParam String offDate) {
 
-        dayOffRepo.deleteByOffDate(LocalDate.parse(offDate));
+        if (offDate == null || offDate.isBlank()) {
+            return "redirect:/admin/services?error=missingOffDate";
+        }
 
-        return "redirect:/admin/services";
+        LocalDate date = LocalDate.parse(offDate);
+
+        return dayOffRepo.findByOffDate(date)
+                .map(d -> {
+                    dayOffRepo.delete(d);
+                    return "redirect:/admin/services?deleted=1";
+                })
+                .orElse("redirect:/admin/services?error=notFound");
     }
 
     // ==============================

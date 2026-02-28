@@ -233,9 +233,7 @@
                    name="date"
                    id="adminDateInput"
                    th:value="${selectedDate}">
-            <div class="note mt-2" th:text="#{admin.autoRefreshNote}">
-                Page refreshes automatically when date changes.
-            </div>
+
         </form>
     </div>
 
@@ -245,7 +243,6 @@
                 <div class="stat-icon"><i class="fa-regular fa-sun"></i></div>
                 <div>
                     <p class="stat-title" th:text="#{admin.stats.today}">Today bookings</p>
-                    <p class="stat-sub" th:text="#{admin.stats.todaySub}">Bookings count for this day</p>
                 </div>
             </div>
             <div class="stat-number" th:text="${dailyCount}">0</div>
@@ -256,7 +253,6 @@
                 <div class="stat-icon"><i class="fa-regular fa-calendar"></i></div>
                 <div>
                     <p class="stat-title" th:text="#{admin.stats.week}">This week bookings</p>
-                    <p class="stat-sub" th:text="#{admin.stats.weekSub}">Bookings count in 7 days</p>
                 </div>
             </div>
             <div class="stat-number" th:text="${weeklyCount}">0</div>
@@ -311,11 +307,18 @@
 
                         <td>
                             <!-- ✅ FIXED: no th:onsubmit -->
-                            <form method="post" action="/admin/delete"
+                            <form method="post"
+                                  th:action="@{/admin/delete}"
                                   class="confirm-form"
                                   th:attr="data-confirm=#{admin.confirmDelete}">
+
+                                <input type="hidden" th:if="${_csrf != null}"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}"/>
+
                                 <input type="hidden" name="id" th:value="${a.id}">
                                 <input type="hidden" name="date" th:value="${selectedDate}">
+
                                 <button type="submit" class="btn-danger-soft" th:text="#{admin.table.deleteBtn}">
                                     Delete
                                 </button>
